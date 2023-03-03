@@ -10,8 +10,8 @@ if ! xdotool --help &>/dev/null; then
 	exit 1
 fi
 
-load_wait_time=4
-save_wait_time=8
+waitTimeSeconds_load=4
+waitTimeSeconds_save=8
 scriptname="$(basename "$0")"
 destination='.'
 browser='google-chrome'
@@ -26,8 +26,8 @@ function print_usage() {
 	printf "  -d, --destination	  Destination path. If a directory, then file is saved with default name inside the directory, else assumed to be full path of target file. Default = '%s'\n" "${destination}" >&2
 	printf "  -s, --suffix		   An optional suffix string for the target file name (ignored if --destination arg is a full path)\n" >&2
 	printf "  -b, --browser		  Browser executable to be used (must be one of 'google-chrome', 'chromium-browser' or 'firefox'). Default = '%s'.\n" "${browser}" >&2
-	printf "  --load-wait-time	   Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = %s\n" "${load_wait_time}" >&2
-	printf "  --save-wait-time	   Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = %s\n" "${save_wait_time}" >&2
+	printf "  --load-wait-time	   Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = %s\n" "${waitTimeSeconds_load}" >&2
+	printf "  --save-wait-time	   Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = %s\n" "${waitTimeSeconds_save}" >&2
 	printf "  -h, --help			 Display this help message and exit.\n" >&2
 }
 
@@ -51,12 +51,12 @@ do
 			;;
 		--load-wait-time)
 			shift;
-			load_wait_time="$1"
+			waitTimeSeconds_load="$1"
 			shift
 			;;
 		--save-wait-time)
 			shift;
-			save_wait_time="$1"
+			waitTimeSeconds_save="$1"
 			shift
 			;;
 		-h | --help)
@@ -120,8 +120,8 @@ function validate_input() {
 	fi
 
 	local num_regexp='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'	# Matches a valid number (in decimal notation)
-	if [[ ! "${load_wait_time}" =~ $num_regexp || ! "${save_wait_time}" =~ $num_regexp ]]; then
-		printf "ERROR: --load-wait-time (='%s'), and --save_wait_time(='%s') must be valid numbers.\n" "${load_wait_time}" "${load_wait_time}" >&2
+	if [[ ! "${waitTimeSeconds_load}" =~ $num_regexp || ! "${waitTimeSeconds_save}" =~ $num_regexp ]]; then
+		printf "ERROR: --load-wait-time (='%s'), and --waitTimeSeconds_save(='%s') must be valid numbers.\n" "${waitTimeSeconds_load}" "${waitTimeSeconds_load}" >&2
 		exit 1
 	fi
 
@@ -137,7 +137,7 @@ validate_input
 
 # Launch ${browser}, and wait for the page to load
 "${browser}" "${url}" &>/dev/null &
-sleep ${load_wait_time}
+sleep ${waitTimeSeconds_load}
 
 # Find the id for the ${browser} window
 browser_wid="$(xdotool search --sync --onlyvisible --class "${browser}" | head -n 1)"
@@ -221,7 +221,7 @@ xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Return
 printf "INFO: Saving web page ...\n" >&2
 
 # Wait for the file to be completely saved
-sleep ${save_wait_time}
+sleep ${waitTimeSeconds_save}
 
 # Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
 if [[ "${is_kde}" -eq 1 ]]; then
