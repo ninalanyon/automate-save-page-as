@@ -18,7 +18,7 @@ browser='google-chrome'
 suffix=''
 url=''
 
-function print_usage() {
+print_usage() {
 	cat <<-EOF
 
 	${scriptname}: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.
@@ -36,7 +36,7 @@ function print_usage() {
 	  --save-wait-time       Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = ${waitTimeSeconds_save}
 	  -h, --help             Display this help message and exit.\n
 	EOF
-}
+	}
 
 while [ "$#" -gt 0 ]
 do
@@ -89,16 +89,16 @@ done
 
 # Returns 1 if input param contains any non-printable or non-ascii character, else returns 0
 # (Inspiration: http://stackoverflow.com/a/13596664/1857518)
-function has_non_printable_or_non_ascii() {
+has_non_printable_or_non_ascii() {
 	LANG=C
 	if printf "%s" "${1}" | grep '[^ -~]\+' &>/dev/null; then
 		printf 1
 	else
 		printf 0
 	fi
-}
+	}
 
-function validate_input() {
+validate_input() {
 	if [[ -z "${url}" ]]; then
 		printf "ERROR: URL must be specified." >&2
 		print_usage
@@ -138,7 +138,7 @@ function validate_input() {
 		printf '!!!! Will NOT proceed !!!!\n' >&2
 		exit 1
 	fi
-}
+	}
 validate_input
 ##############
 
