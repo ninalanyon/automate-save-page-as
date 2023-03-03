@@ -98,159 +98,164 @@ validate_input() {
 	}
 
 
-checkXdotoolIsInstalled
+main() {
+	checkXdotoolIsInstalled
 
 
-while [ "$#" -gt 0 ]; do
-	case "$1" in
-		-d | --destination)
-			shift;
-			destination="$1"
-			shift
-			;;
-		-s | --suffix)
-			shift;
-			suffix="$1"
-			shift;
-			;;
-		-b | --browser)
-			shift;
-			browser="$1"
-			shift
-			;;
-		--load-wait-time)
-			shift;
-			waitTimeSeconds_load="$1"
-			shift
-			;;
-		--save-wait-time)
-			shift;
-			waitTimeSeconds_save="$1"
-			shift
-			;;
-		-h | --help)
-			print_usage
-			exit 0
-			;;
-		-*)
-			printf "ERROR: Unknown option: %s\n" "${1}">&2
-			print_usage
-			exit 1
-			;;
-		*)
-			if [ ! -z "$url" ]; then
-				printf "ERROR: Expected exactly one positional argument (URL) to be present, but encountered a second one ('%s').\n\n" "${1}" >&2
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			-d | --destination)
+				shift;
+				destination="$1"
+				shift
+				;;
+			-s | --suffix)
+				shift;
+				suffix="$1"
+				shift;
+				;;
+			-b | --browser)
+				shift;
+				browser="$1"
+				shift
+				;;
+			--load-wait-time)
+				shift;
+				waitTimeSeconds_load="$1"
+				shift
+				;;
+			--save-wait-time)
+				shift;
+				waitTimeSeconds_save="$1"
+				shift
+				;;
+			-h | --help)
+				print_usage
+				exit 0
+				;;
+			-*)
+				printf "ERROR: Unknown option: %s\n" "${1}">&2
 				print_usage
 				exit 1
-			fi
-			url="$1"
-			shift;
-			;;
-	esac
-done
+				;;
+			*)
+				if [ ! -z "$url" ]; then
+					printf "ERROR: Expected exactly one positional argument (URL) to be present, but encountered a second one ('%s').\n\n" "${1}" >&2
+					print_usage
+					exit 1
+				fi
+				url="$1"
+				shift;
+				;;
+		esac
+	done
 
 
-validate_input
+	validate_input
 
 
-# Launch ${browser}, and wait for the page to load
-"${browser}" "${url}" &>/dev/null &
-sleep ${waitTimeSeconds_load}
+	# Launch ${browser}, and wait for the page to load
+	"${browser}" "${url}" &>/dev/null &
+	sleep ${waitTimeSeconds_load}
 
-# Find the id for the ${browser} window
-browser_wid="$(xdotool search --sync --onlyvisible --class "${browser}" | head -n 1)"
-wid_re='^[0-9]+$'	# window-id must be a valid integer
-if [[ ! "${browser_wid}" =~ ${wid_re} ]]; then
-	printf "ERROR: Unable to find X-server window id for browser.\n" >&2
-	exit 1
-fi
+	# Find the id for the ${browser} window
+	browser_wid="$(xdotool search --sync --onlyvisible --class "${browser}" | head -n 1)"
+	wid_re='^[0-9]+$'	# window-id must be a valid integer
+	if [[ ! "${browser_wid}" =~ ${wid_re} ]]; then
+		printf "ERROR: Unable to find X-server window id for browser.\n" >&2
+		exit 1
+	fi
 
-# Activate the ${browser} window, and "press" ctrl+s
-#TODO:
-#xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+s"
-xdotool windowactivate "${browser_wid}"
-xdotool key --window "${browser_wid}" --clearmodifiers "ctrl+s"
+	# Activate the ${browser} window, and "press" ctrl+s
+	#TODO:
+	#xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+s"
+	xdotool windowactivate "${browser_wid}"
+	xdotool key --window "${browser_wid}" --clearmodifiers "ctrl+s"
 
 
-sleep 1 # Give 'Save as' dialog box time to show up
+	sleep 1 # Give 'Save as' dialog box time to show up
 
-# Resolve the expected title name for save file dialog box (chrome & firefox differ in this regard)
-if [[ "${browser}" == "firefox" ]]; then
-	savefile_dialog_title="Save as"
-else
-	savefile_dialog_title="Save file"
-fi
-# Find window id for the "Save file" dialog box
-savefile_wid="$(xdotool search --name "$savefile_dialog_title" | head -n 1)"
-if [[ ! "${savefile_wid}" =~ ${wid_re} ]]; then
-	printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
-	exit 1
-fi
-
-# Fix for Issue #1: Explicitly focus on the "name" field (works on both: gnome, and kde)
-xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifier "Alt+n"
-
-# Check if we are using kde
-is_kde=0
-# Don't feel bad if DESKTOP_SESSION env variable is not present
-set +u
-if [[ "${DESKTOP_SESSION}" =~ ^kde-? ]]; then
-	is_kde=1
-fi
-set -u
-
-if [[ ! -z "${suffix}" ]]; then
-	###########################
-	# Make sure that we are at correct position before typing the "suffix"
-	#
-	# If the user is using 'kde-plasma', then the full name of the file including the extension is highlighted
-	# in the name field, so simply pressing a Right key and adding suffix leads to incorrect result.
-	# Hence as a special case for 'kde-*' we move back 5 characters Left from the end before adding the suffix.
-	# Now this strategy is certainly not full proof and assumes that file extension is always 4 characters long ('html'),
-	# but this is the only fix I can think for this special case right now. Of course it's easy to tweak the number of
-	# Left key moves you need if you know your file types in advance.
-	if [[ "${is_kde}" -eq 1 ]]; then
-		printf "INFO: Desktop session is found to be '${DESKTOP_SESSION}', hence the full file name will be highlighted. " >&2
-		printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
-		xdotool windowactivate "${savefile_wid}" key --delay 40 --clearmodifier End Left Left Left Left Left
+	# Resolve the expected title name for save file dialog box (chrome & firefox differ in this regard)
+	if [[ "${browser}" == "firefox" ]]; then
+		savefile_dialog_title="Save as"
 	else
-		xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Right
+		savefile_dialog_title="Save file"
+	fi
+	# Find window id for the "Save file" dialog box
+	savefile_wid="$(xdotool search --name "$savefile_dialog_title" | head -n 1)"
+	if [[ ! "${savefile_wid}" =~ ${wid_re} ]]; then
+		printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
+		exit 1
+	fi
+
+	# Fix for Issue #1: Explicitly focus on the "name" field (works on both: gnome, and kde)
+	xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifier "Alt+n"
+
+	# Check if we are using kde
+	is_kde=0
+	# Don't feel bad if DESKTOP_SESSION env variable is not present
+	set +u
+	if [[ "${DESKTOP_SESSION}" =~ ^kde-? ]]; then
+		is_kde=1
 	fi
 	set -u
-	###########################
 
-	extraarg=""
-	if [[ "${suffix::1}}" == "-" ]]; then
-		extraarg="-"
+	if [[ ! -z "${suffix}" ]]; then
+		###########################
+		# Make sure that we are at correct position before typing the "suffix"
+		#
+		# If the user is using 'kde-plasma', then the full name of the file including the extension is highlighted
+		# in the name field, so simply pressing a Right key and adding suffix leads to incorrect result.
+		# Hence as a special case for 'kde-*' we move back 5 characters Left from the end before adding the suffix.
+		# Now this strategy is certainly not full proof and assumes that file extension is always 4 characters long ('html'),
+		# but this is the only fix I can think for this special case right now. Of course it's easy to tweak the number of
+		# Left key moves you need if you know your file types in advance.
+		if [[ "${is_kde}" -eq 1 ]]; then
+			printf "INFO: Desktop session is found to be '${DESKTOP_SESSION}', hence the full file name will be highlighted. " >&2
+			printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
+			xdotool windowactivate "${savefile_wid}" key --delay 40 --clearmodifier End Left Left Left Left Left
+		else
+			xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Right
+		fi
+		set -u
+		###########################
+
+		extraarg=""
+		if [[ "${suffix::1}}" == "-" ]]; then
+			extraarg="-"
+		fi
+		xdotool type --delay 10 --clearmodifiers "${extraarg}" "${suffix}"
 	fi
-	xdotool type --delay 10 --clearmodifiers "${extraarg}" "${suffix}"
-fi
 
-# Activate the 'Save File' dialog and type in the appropriate filename (depending on ${destination} value: 1) directory, 2) full path, 3) empty)
-if [[ ! -z "${destination}" ]]; then
-	if [[ -d "${destination}" ]]; then
-		# Case 1: --destination was a directory.
-		xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Home
-		xdotool type --delay 10 --clearmodifiers "${destination}/"
+	# Activate the 'Save File' dialog and type in the appropriate filename (depending on ${destination} value: 1) directory, 2) full path, 3) empty)
+	if [[ ! -z "${destination}" ]]; then
+		if [[ -d "${destination}" ]]; then
+			# Case 1: --destination was a directory.
+			xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Home
+			xdotool type --delay 10 --clearmodifiers "${destination}/"
+		else
+			# Case 2: --destination was full path.
+			xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
+			xdotool type --delay 10 --clearmodifiers "${destination}"
+		fi
+	fi
+	xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Return
+
+	printf "INFO: Saving web page ...\n" >&2
+
+	# Wait for the file to be completely saved
+	sleep ${waitTimeSeconds_save}
+
+	# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
+	if [[ "${is_kde}" -eq 1 ]]; then
+		xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
 	else
-		# Case 2: --destination was full path.
-		xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
-		xdotool type --delay 10 --clearmodifiers "${destination}"
+	# TODO:
+	#	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4"
+		xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
 	fi
-fi
-xdotool windowactivate "${savefile_wid}" key --delay 20 --clearmodifiers Return
+	printf "INFO: Done!\n">&2
+	}
 
-printf "INFO: Saving web page ...\n" >&2
 
-# Wait for the file to be completely saved
-sleep ${waitTimeSeconds_save}
-
-# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
-if [[ "${is_kde}" -eq 1 ]]; then
-	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
-else
-# TODO:
-#	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4"
-	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
-fi
-printf "INFO: Done!\n">&2
+main "$@"
