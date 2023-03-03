@@ -249,6 +249,8 @@ sleep ${waitTimeSeconds_save}
 if [[ "${is_kde}" -eq 1 ]]; then
 	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
 else
-	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4"
+# TODO:
+#	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+F4"
+	xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+w"
 fi
 printf "INFO: Done!\n">&2
