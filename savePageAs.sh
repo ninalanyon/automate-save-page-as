@@ -4,11 +4,15 @@ set -e
 set -u
 set -o pipefail
 
-# Assert existence of xdotool to begin with
-if ! xdotool --help &>/dev/null; then
-	printf "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform.\n" >&2
-	exit 1
-fi
+
+checkXdotoolIsInstalled() {
+	if ! xdotool --help &>/dev/null; then
+		printf "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform.\n" >&2
+		exit 1
+	fi
+	}
+checkXdotoolIsInstalled
+
 
 waitTimeSeconds_load=4
 waitTimeSeconds_save=8
