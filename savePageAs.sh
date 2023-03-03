@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 set -u
@@ -38,8 +38,7 @@ print_usage() {
 	EOF
 	}
 
-while [ "$#" -gt 0 ]
-do
+while [ "$#" -gt 0 ]; do
 	case "$1" in
 		-d | --destination)
 			shift;
