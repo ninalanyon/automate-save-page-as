@@ -5,15 +5,6 @@ set -u
 set -o pipefail
 
 
-checkXdotoolIsInstalled() {
-	if ! xdotool --help &>/dev/null; then
-		printf "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform.\n" >&2
-		exit 1
-	fi
-	}
-checkXdotoolIsInstalled
-
-
 waitTimeSeconds_load=4
 waitTimeSeconds_save=8
 scriptname="$(basename "$0")"
@@ -21,6 +12,15 @@ destination='.'
 browser='google-chrome'
 suffix=''
 url=''
+
+
+checkXdotoolIsInstalled() {
+	if ! xdotool --help &>/dev/null; then
+		printf "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform.\n" >&2
+		exit 1
+	fi
+	}
+
 
 print_usage() {
 	cat <<-EOF
@@ -41,6 +41,65 @@ print_usage() {
 	  -h, --help             Display this help message and exit.\n
 	EOF
 	}
+
+
+# Returns 1 if input param contains any non-printable or non-ascii character, else returns 0
+# (Inspiration: http://stackoverflow.com/a/13596664/1857518)
+has_non_printable_or_non_ascii() {
+	LANG=C
+	if printf "%s" "${1}" | grep '[^ -~]\+' &>/dev/null; then
+		printf 1
+	else
+		printf 0
+	fi
+	}
+
+
+validate_input() {
+	if [[ -z "${url}" ]]; then
+		printf "ERROR: URL must be specified." >&2
+		print_usage
+		exit 1
+	fi
+
+	if [[ -d "${destination}" ]]; then
+		printf "INFO: The specified destination ('%s') is a directory path, will save file inside it with the default name.\n" "${destination}">&2
+	else
+		local basedir="$(dirname "${destination}")"
+		if [[ ! -d "${basedir}" ]]; then
+			printf "ERROR: Directory '%s' does not exist - Will NOT continue.\n" "${basedir}" >&2
+			exit 1
+		fi
+	fi
+	destination="$(readlink -f "$destination")"	# Ensure absolute path
+
+	if [[ "${browser}" != "google-chrome" && "${browser}" != "chromium-browser" && "${browser}" != "firefox" ]]; then
+		printf "ERROR: Browser (%s) is not supported, must be one of 'google-chrome', 'chromium-browser' or 'firefox'.\n" "${browser}" >&2
+		exit 1
+	fi
+
+	if ! command -v "${browser}" &>/dev/null; then
+		printf "ERROR: Command '${browser}' not found. Make sure it is installed, and in path.\n" >&2
+		exit 1
+	fi
+
+	local num_regexp='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'	# Matches a valid number (in decimal notation)
+	if [[ ! "${waitTimeSeconds_load}" =~ $num_regexp || ! "${waitTimeSeconds_save}" =~ $num_regexp ]]; then
+		printf "ERROR: --load-wait-time (='%s'), and --waitTimeSeconds_save(='%s') must be valid numbers.\n" "${waitTimeSeconds_load}" "${waitTimeSeconds_load}" >&2
+		exit 1
+	fi
+
+	if [[ $(has_non_printable_or_non_ascii "${destination}") -eq 1 || $(has_non_printable_or_non_ascii "${suffix}") -eq 1 ]]; then
+		printf "ERROR: Either --destination ('%s') or --suffix ('%s') contains a non ascii or non-printable ascii character(s). " "${destination}" "${suffix}" >&2
+		printf "'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n" >&2
+		printf '!!!! Will NOT proceed !!!!\n' >&2
+		exit 1
+	fi
+	}
+
+
+checkXdotoolIsInstalled
+
 
 while [ "$#" -gt 0 ]; do
 	case "$1" in
@@ -90,60 +149,9 @@ while [ "$#" -gt 0 ]; do
 	esac
 done
 
-# Returns 1 if input param contains any non-printable or non-ascii character, else returns 0
-# (Inspiration: http://stackoverflow.com/a/13596664/1857518)
-has_non_printable_or_non_ascii() {
-	LANG=C
-	if printf "%s" "${1}" | grep '[^ -~]\+' &>/dev/null; then
-		printf 1
-	else
-		printf 0
-	fi
-	}
 
-validate_input() {
-	if [[ -z "${url}" ]]; then
-		printf "ERROR: URL must be specified." >&2
-		print_usage
-		exit 1
-	fi
-
-	if [[ -d "${destination}" ]]; then
-		printf "INFO: The specified destination ('%s') is a directory path, will save file inside it with the default name.\n" "${destination}">&2
-	else
-		local basedir="$(dirname "${destination}")"
-		if [[ ! -d "${basedir}" ]]; then
-			printf "ERROR: Directory '%s' does not exist - Will NOT continue.\n" "${basedir}" >&2
-			exit 1
-		fi
-	fi
-	destination="$(readlink -f "$destination")"	# Ensure absolute path
-
-	if [[ "${browser}" != "google-chrome" && "${browser}" != "chromium-browser" && "${browser}" != "firefox" ]]; then
-		printf "ERROR: Browser (%s) is not supported, must be one of 'google-chrome', 'chromium-browser' or 'firefox'.\n" "${browser}" >&2
-		exit 1
-	fi
-
-	if ! command -v "${browser}" &>/dev/null; then
-		printf "ERROR: Command '${browser}' not found. Make sure it is installed, and in path.\n" >&2
-		exit 1
-	fi
-
-	local num_regexp='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'	# Matches a valid number (in decimal notation)
-	if [[ ! "${waitTimeSeconds_load}" =~ $num_regexp || ! "${waitTimeSeconds_save}" =~ $num_regexp ]]; then
-		printf "ERROR: --load-wait-time (='%s'), and --waitTimeSeconds_save(='%s') must be valid numbers.\n" "${waitTimeSeconds_load}" "${waitTimeSeconds_load}" >&2
-		exit 1
-	fi
-
-	if [[ $(has_non_printable_or_non_ascii "${destination}") -eq 1 || $(has_non_printable_or_non_ascii "${suffix}") -eq 1 ]]; then
-		printf "ERROR: Either --destination ('%s') or --suffix ('%s') contains a non ascii or non-printable ascii character(s). " "${destination}" "${suffix}" >&2
-		printf "'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n" >&2
-		printf '!!!! Will NOT proceed !!!!\n' >&2
-		exit 1
-	fi
-	}
 validate_input
-##############
+
 
 # Launch ${browser}, and wait for the page to load
 "${browser}" "${url}" &>/dev/null &
