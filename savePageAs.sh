@@ -166,7 +166,11 @@ if [[ ! "${browser_wid}" =~ ${wid_re} ]]; then
 fi
 
 # Activate the ${browser} window, and "press" ctrl+s
-xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+s"
+#TODO:
+#xdotool windowactivate "${browser_wid}" key --clearmodifiers "ctrl+s"
+xdotool windowactivate "${browser_wid}"
+xdotool key --window "${browser_wid}" --clearmodifiers "ctrl+s"
+
 
 sleep 1 # Give 'Save as' dialog box time to show up
 
