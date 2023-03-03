@@ -19,16 +19,23 @@ suffix=''
 url=''
 
 function print_usage() {
-	printf "\n%s: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.\n\n" "${scriptname}" >&2
-	printf "USAGE:\n   %s URL [OPTIONS]\n\n" "${scriptname}" >&2
-	printf "URL					  The url of the web page to be saved.\n\n" >&2
-	printf "options:\n" >&2
-	printf "  -d, --destination	  Destination path. If a directory, then file is saved with default name inside the directory, else assumed to be full path of target file. Default = '%s'\n" "${destination}" >&2
-	printf "  -s, --suffix		   An optional suffix string for the target file name (ignored if --destination arg is a full path)\n" >&2
-	printf "  -b, --browser		  Browser executable to be used (must be one of 'google-chrome', 'chromium-browser' or 'firefox'). Default = '%s'.\n" "${browser}" >&2
-	printf "  --load-wait-time	   Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = %s\n" "${waitTimeSeconds_load}" >&2
-	printf "  --save-wait-time	   Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = %s\n" "${waitTimeSeconds_save}" >&2
-	printf "  -h, --help			 Display this help message and exit.\n" >&2
+	cat <<-EOF
+
+	${scriptname}: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.
+
+	USAGE:
+	    ${scriptname} URL [OPTIONS]
+
+	URL                      The url of the web page to be saved.
+
+	options:
+	  -d, --destination      Destination path. If a directory, then file is saved with default name inside the directory, else assumed to be full path of target file. Default = '${destination}'
+	  -s, --suffix           An optional suffix string for the target file name (ignored if --destination arg is a full path)
+	  -b, --browser          Browser executable to be used (must be one of 'google-chrome', 'chromium-browser' or 'firefox'). Default = '${browser}'.
+	  --load-wait-time       Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = ${waitTimeSeconds_load}
+	  --save-wait-time       Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = ${waitTimeSeconds_save}
+	  -h, --help             Display this help message and exit.\n
+	EOF
 }
 
 while [ "$#" -gt 0 ]
