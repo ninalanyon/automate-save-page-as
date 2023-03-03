@@ -13,10 +13,10 @@ fi
 load_wait_time=4
 save_wait_time=8
 scriptname="$(basename "$0")"
-destination="."
-browser="google-chrome"
-suffix=""
-url=""
+destination='.'
+browser='google-chrome'
+suffix=''
+url=''
 
 function print_usage() {
 	printf "\n%s: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.\n\n" "${scriptname}" >&2
