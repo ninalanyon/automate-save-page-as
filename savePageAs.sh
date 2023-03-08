@@ -98,6 +98,15 @@ validate_input() {
 	}
 
 
+debug() {
+	cat <<-EODEBUG
+	######################################
+	# $1
+	######################################
+	EODEBUG
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 
