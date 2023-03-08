@@ -107,6 +107,24 @@ debug() {
 	}
 
 
+loadPageInBrowser() {
+	"$browser" "$url" &>/dev/null &
+	sleep "$waitTimeSeconds_load"
+	debug 'Done : Launch browser + wait for page to load'
+	}
+
+
+findBrowserWindowId() {
+	browser_wid="$(xdotool search --sync --onlyvisible --class "${browser}" | head -n 1)"
+	wid_re='^[0-9]+$'	# window-id must be a valid integer
+	if [[ ! "${browser_wid}" =~ ${wid_re} ]]; then
+		printf "ERROR: Unable to find X-server window id for browser.\n" >&2
+		exit 1
+	fi
+	debug "Done : find the ID of the browser window : '$browser_wid'"
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 
@@ -159,21 +177,9 @@ main() {
 		esac
 	done
 
-
 	validate_input
-
-
-	# Launch ${browser}, and wait for the page to load
-	"${browser}" "${url}" &>/dev/null &
-	sleep ${waitTimeSeconds_load}
-
-	# Find the id for the ${browser} window
-	browser_wid="$(xdotool search --sync --onlyvisible --class "${browser}" | head -n 1)"
-	wid_re='^[0-9]+$'	# window-id must be a valid integer
-	if [[ ! "${browser_wid}" =~ ${wid_re} ]]; then
-		printf "ERROR: Unable to find X-server window id for browser.\n" >&2
-		exit 1
-	fi
+	loadPageInBrowser
+	findBrowserWindowId
 
 	# Activate the ${browser} window, and "press" ctrl+s
 	#TODO:
