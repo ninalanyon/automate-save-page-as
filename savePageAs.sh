@@ -46,12 +46,15 @@ usage() {
 	URL                      The url of the web page to be saved.
 
 	options:
-	  -d, --destination      Destination path. If a directory, then file is saved with default name inside the directory, else assumed to be full path of target file. Default = '$destination'
-	  -s, --suffix           An optional suffix string for the target file name (ignored if --destination arg is a full path)
+	  -d, --destination      Destination path :
+	                            * if a directory : file is saved there with default name
+	                            * otherwise : assumed to be full path of target file
+	                            Default = '$destination'
+	  -s, --suffix           Optional suffix string for the target file name (ignored if --destination arg is a full path)
 	  -b, --browser          Browser executable to be used (must be one of 'google-chrome', 'chromium-browser' or 'firefox'). Default = '$browser'.
-	  --load-wait-time       Number of seconds to wait for the page to be loaded (i.e., seconds to sleep before Ctrl+S is 'pressed'). Default = $waitTimeSecondsLoad
-	  --save-wait-time       Number of seconds to wait for the page to be saved (i.e., seconds to sleep before Ctrl+F4 is 'pressed'). Default = $waitTimeSecondsSave
-	  -h, --help             Display this help message and exit.\n
+	  --load-wait-time       Number of seconds to wait for the page to be loaded (i.e. seconds to sleep before Ctrl+s is 'pressed'). Default = $waitTimeSecondsLoad
+	  --save-wait-time       Number of seconds to wait for the page to be saved  (i.e. seconds to sleep before Ctrl+w is 'pressed'). Default = $waitTimeSecondsSave
+	  -h, --help             Display this help message and exit.
 	EOF
 	}
 
