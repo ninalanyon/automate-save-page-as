@@ -4,17 +4,17 @@ set -e
 set -u
 set -o pipefail
 
-
+browser='google-chrome'
+destination='.'
+scriptname="$(basename "$0")"
+usingKde=0
 waitTimeSecondsLoad=4
 waitTimeSecondsSave=8
-scriptname="$(basename "$0")"
-destination='.'
-browser='google-chrome'
+
+# will be populated later
+savefileDialogTitle=''
 suffix=''
 url=''
-
-savefileDialogTitle=''	# will be populated later
-usingKde=0
 
 
 error() {
@@ -35,7 +35,7 @@ checkXdotoolIsInstalled() {
 	}
 
 
-print_usage() {
+usage() {
 	cat <<-EOF
 
 	$scriptname: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.
@@ -69,25 +69,25 @@ has_non_printable_or_non_ascii() {
 
 
 validate_input() {
-	if [[ -z "$url" ]]; then
+	[ -z "$url" ] && {
 		error 'URL must be specified.'
-		print_usage
+		usage
 		exit 1
-	fi
+		}
 
-	if [[ -d "$destination" ]]; then
+	if [ -d "$destination" ]; then
 		info "The specified destination ('$destination') is a directory path, will save file inside it with the default name."
 	else
-		local basedir="$(dirname "$destination")"
-		if [[ ! -d "$basedir" ]]; then
-			error "Directory '$basedir' does not exist - Will NOT continue."
+		local destinationDir="$(dirname "$destination")"
+		if [[ ! -d "$destinationDir" ]]; then
+			error "Directory '$destinationDir' does not exist - Will NOT continue."
 			# TODO: create it ?
 			exit 1
 		fi
 	fi
 	destination="$(readlink -f "$destination")"	# Ensure absolute path
 
-	if [[ "$browser" != 'google-chrome' && "$browser" != 'chromium-browser' && "$browser" != 'firefox' ]]; then
+	if [ "$browser" != 'google-chrome' -a "$browser" != 'chromium-browser' -a "$browser" != 'firefox' ]; then
 		error "Browser '$browser' is not supported, must be one of 'google-chrome', 'chromium-browser' or 'firefox'."
 		exit 1
 	fi
@@ -97,13 +97,13 @@ validate_input() {
 		exit 1
 	fi
 
-	local num_regexp='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'	# Matches a valid number (in decimal notation)
-	if [[ ! "$waitTimeSecondsLoad" =~ $num_regexp || ! "$waitTimeSecondsSave" =~ $num_regexp ]]; then
+	local decimalNumberValidationRegex='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'
+	if [[ ! "$waitTimeSecondsLoad" =~ $decimalNumberValidationRegex || ! "$waitTimeSecondsSave" =~ $decimalNumberValidationRegex ]]; then
 		error "--load-wait-time (='$waitTimeSecondsLoad'), and --waitTimeSeconds_save(='$waitTimeSecondsLoad') must be valid numbers."
 		exit 1
 	fi
 
-	if [[ $(has_non_printable_or_non_ascii "$destination") -eq 1 || $(has_non_printable_or_non_ascii "$suffix") -eq 1 ]]; then
+	if [ $(has_non_printable_or_non_ascii "$destination") -eq 1 -o $(has_non_printable_or_non_ascii "$suffix") -eq 1 ]; then
 		error "Either --destination ('$destination') or --suffix ('$suffix') contains non-ascii or non-printable ascii character(s).\n'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n"'!!!! Will NOT proceed !!!!'
 		exit 1
 	fi
@@ -156,18 +156,18 @@ getCliParameters() {
 				shift
 				;;
 			-h | --help)
-				print_usage
+				usage
 				exit 0
 				;;
 			-*)
 				error "Unknown option: '$1'"
-				print_usage
+				usage
 				exit 1
 				;;
 			*)
 				if [ ! -z "$url" ]; then
 					error "Expected exactly one positional argument (URL) to be present, but encountered a second one ('$1')."
-					print_usage
+					usage
 					exit 1
 				fi
 				url="$1"
@@ -256,9 +256,8 @@ saveFileAs() {
 	fi
 	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
 
-	# Wait for the file to be completely saved
-	sleep "$waitTimeSecondsSave"
 	info 'Saving web page ...'
+	sleep "$waitTimeSecondsSave"	# Wait for the file to be completely saved
 	}
 
 
