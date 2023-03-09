@@ -244,17 +244,7 @@ makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix() {
 	}
 
 
-main() {
-	checkXdotoolIsInstalled
-	getCliParameters "$@"
-	validate_input
-	loadBrowserVariables
-	loadPageInBrowser
-	sendCtrlSToBrowser
-	findSaveFileDialogBoxWindowId
-	checkIfWeAreUsingKde
-	makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix
-
+saveFileAs() {
 	# Activate the 'Save File' dialog and type in the appropriate filename (depending on $destination value: 1) directory, 2) full path, 3) empty)
 	if [ -n "$destination" ]; then
 		if [ -d "$destination" ]; then
@@ -273,6 +263,21 @@ main() {
 
 	# Wait for the file to be completely saved
 	sleep "$waitTimeSecondsSave"
+	}
+
+
+main() {
+	checkXdotoolIsInstalled
+	getCliParameters "$@"
+	validate_input
+	loadBrowserVariables
+	loadPageInBrowser
+	sendCtrlSToBrowser
+	findSaveFileDialogBoxWindowId
+	checkIfWeAreUsingKde
+	makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix
+	saveFileAs
+
 
 	# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
 	if [ "$usingKde" -eq 1 ]; then
