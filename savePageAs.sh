@@ -217,22 +217,9 @@ checkIfWeAreUsingKde() {
 	}
 
 
-main() {
-	checkXdotoolIsInstalled
-	getCliParameters "$@"
-
-	validate_input
-	loadBrowserVariables
-	loadPageInBrowser
-	sendCtrlSToBrowser
-	findSaveFileDialogBoxWindowId
-	checkIfWeAreUsingKde
-
-
+makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix() {
 	if [ -n "$suffix" ]; then
 		###########################
-		# Make sure that we are at correct position before typing the "suffix"
-		#
 		# If the user is using 'kde-plasma', then the full name of the file including the extension is highlighted
 		# in the name field, so simply pressing a Right key and adding suffix leads to incorrect result.
 		# Hence as a special case for 'kde-*' we move back 5 characters Left from the end before adding the suffix.
@@ -246,13 +233,27 @@ main() {
 		else
 			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Right
 		fi
-		set -u
+		set -u	# TODO: ???
 		###########################
 
 		# check 1st char of "$suffix"
 		[ "${suffix::1}" == '-' ] && extraarg='-' || extraarg=''
+
 		xdotool type --delay 10 --clearmodifiers "$extraarg" "$suffix"
 	fi
+	}
+
+
+main() {
+	checkXdotoolIsInstalled
+	getCliParameters "$@"
+	validate_input
+	loadBrowserVariables
+	loadPageInBrowser
+	sendCtrlSToBrowser
+	findSaveFileDialogBoxWindowId
+	checkIfWeAreUsingKde
+	makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix
 
 	# Activate the 'Save File' dialog and type in the appropriate filename (depending on $destination value: 1) directory, 2) full path, 3) empty)
 	if [ -n "$destination" ]; then
