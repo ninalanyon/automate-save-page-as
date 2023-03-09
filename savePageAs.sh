@@ -18,12 +18,12 @@ url=''
 
 
 error() {
-	echo "ERROR: $1" >&2
+	echo -e "ERROR: $1" >&2
 	}
 
 
 info() {
-	echo "INFO: $1"
+	echo -e "INFO: $1"
 	}
 
 
