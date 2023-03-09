@@ -114,14 +114,15 @@ loadPageInBrowser() {
 	}
 
 
-findBrowserWindowId() {
-	webBrowserWindowId="$(xdotool search --sync --onlyvisible --class "$browser" | head -n 1)"
-	windowIdValidationRegex='^[0-9]+$'	# window-id must be a valid integer
-	if [[ ! "$webBrowserWindowId" =~ $windowIdValidationRegex ]]; then
-		printf "ERROR: Unable to find X-server window id for browser.\n" >&2
-		exit 1
-	fi
-	debug "Done : find the ID of the browser window : '$webBrowserWindowId'"
+sendCtrlSToBrowser() {
+	#TODO: the explicit 'Firefox' below breaks the compatibility with other browsers
+	xdotool search --desktop 0 'Firefox' windowactivate key --clearmodifiers 'ctrl+s'
+	# source :
+	#	https://askubuntu.com/questions/21262/shell-command-to-bring-a-program-window-in-front-of-another/21276#21276
+	#	https://code.google.com/archive/p/semicomplete/issues/66
+
+	debug 'activated FF window + sent CTRL-s'
+	sleep 1	# Give 'Save as' dialog box time to show up
 	}
 
 
@@ -179,16 +180,10 @@ main() {
 
 	validate_input
 	loadPageInBrowser
-	findBrowserWindowId
-
-	# Activate the "$browser" window, and "press" ctrl+s
-	#TODO:
-	#xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+s"
-	xdotool windowactivate "$webBrowserWindowId"
-	xdotool key --window "$webBrowserWindowId" --clearmodifiers "ctrl+s"
+	sendCtrlSToBrowser
 
 
-	sleep 1 # Give 'Save as' dialog box time to show up
+
 
 	# Resolve the expected title name for save file dialog box (chrome & firefox differ in this regard)
 	if [[ "$browser" == 'firefox' ]]; then
