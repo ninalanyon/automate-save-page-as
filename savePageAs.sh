@@ -110,19 +110,9 @@ validate_input() {
 	}
 
 
-debug() {
-	cat <<-EODEBUG
-	######################################
-	# $1
-	######################################
-	EODEBUG
-	}
-
-
 loadPageInBrowser() {
 	"$browser" "$url" &>/dev/null &
 	sleep "$waitTimeSecondsLoad"
-	debug 'Done : Launch browser + wait for page to load'
 	}
 
 
@@ -133,7 +123,6 @@ sendCtrlSToBrowser() {
 	#	https://askubuntu.com/questions/21262/shell-command-to-bring-a-program-window-in-front-of-another/21276#21276
 	#	https://code.google.com/archive/p/semicomplete/issues/66
 
-	debug 'activated FF window + sent CTRL-s'
 	sleep 1	# Give 'Save as' dialog box time to show up
 	}
 
