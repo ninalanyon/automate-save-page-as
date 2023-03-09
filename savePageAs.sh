@@ -266,6 +266,21 @@ saveFileAs() {
 	}
 
 
+closeBrowserTab() {
+	# Ctrl+w for KDE, Ctrl+F4 otherwise
+	if [ "$usingKde" -eq 1 ]; then
+		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
+	else
+	# TODO:
+	#	xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+F4"
+#		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
+		xdotool search --desktop 0 "Firefox" windowactivate key --clearmodifiers "ctrl+w"
+
+	fi
+	printf "INFO: Done!\n">&2
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 	getCliParameters "$@"
@@ -277,17 +292,7 @@ main() {
 	checkIfWeAreUsingKde
 	makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix
 	saveFileAs
-
-
-	# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
-	if [ "$usingKde" -eq 1 ]; then
-		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
-	else
-	# TODO:
-	#	xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+F4"
-		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
-	fi
-	printf "INFO: Done!\n">&2
+	closeBrowserTab
 	}
 
 
