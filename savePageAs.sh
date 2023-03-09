@@ -14,6 +14,8 @@ suffix=''
 url=''
 webBrowserWindowId=''
 savefileDialogTitle=''	# will be populated later
+usingKde=0
+
 
 checkXdotoolIsInstalled() {
 	if ! xdotool --help &>/dev/null; then
@@ -203,6 +205,18 @@ findSaveFileDialogBoxWindowId() {
 	}
 
 
+checkIfWeAreUsingKde() {
+	# Don't feel bad if DESKTOP_SESSION env variable is not present
+	set +u
+	if [[ "$DESKTOP_SESSION" =~ ^kde-? ]]; then
+		usingKde=1
+	fi
+	set -u
+	# TODO: don't like this code very much, and doesn't seems feasible anyway
+	#	https://unix.stackexchange.com/questions/116539/how-to-detect-the-desktop-environment-in-a-bash-script
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 	getCliParameters "$@"
@@ -212,16 +226,8 @@ main() {
 	loadPageInBrowser
 	sendCtrlSToBrowser
 	findSaveFileDialogBoxWindowId
+	checkIfWeAreUsingKde
 
-
-	# Check if we are using kde
-	isKde=0
-	# Don't feel bad if DESKTOP_SESSION env variable is not present
-	set +u
-	if [[ "$DESKTOP_SESSION" =~ ^kde-? ]]; then
-		isKde=1
-	fi
-	set -u
 
 	if [[ ! -z "$suffix" ]]; then
 		###########################
@@ -233,7 +239,7 @@ main() {
 		# Now this strategy is certainly not full proof and assumes that file extension is always 4 characters long ('html'),
 		# but this is the only fix I can think for this special case right now. Of course it's easy to tweak the number of
 		# Left key moves you need if you know your file types in advance.
-		if [[ "$isKde" -eq 1 ]]; then
+		if [[ "$usingKde" -eq 1 ]]; then
 			printf "INFO: Desktop session is found to be '$DESKTOP_SESSION', hence the full file name will be highlighted. " >&2
 			printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
 			xdotool windowactivate "$savefileWindowId" key --delay 40 --clearmodifier End Left Left Left Left Left
@@ -270,7 +276,7 @@ main() {
 	sleep "$waitTimeSecondsSave"
 
 	# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
-	if [[ "$isKde" -eq 1 ]]; then
+	if [[ "$usingKde" -eq 1 ]]; then
 		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
 	else
 	# TODO:
