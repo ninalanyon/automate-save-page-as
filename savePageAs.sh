@@ -190,6 +190,19 @@ loadBrowserVariables() {
 	}
 
 
+findSaveFileDialogBoxWindowId() {
+	windowIdValidationRegex='^[0-9]+$'	# window-id must be a valid integer
+	savefileWindowId="$(xdotool search --name "$savefileDialogTitle" | head -n 1)"
+	if [[ ! "$savefileWindowId" =~ $windowIdValidationRegex ]]; then
+		printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
+		exit 1
+	fi
+
+	# Fix for Issue #1: Explicitly focus on the "name" field (works on both: gnome, and kde)
+	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifier 'Alt+n'
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 	getCliParameters "$@"
@@ -198,19 +211,8 @@ main() {
 	loadBrowserVariables
 	loadPageInBrowser
 	sendCtrlSToBrowser
+	findSaveFileDialogBoxWindowId
 
-
-
-
-	# Find window id for the "Save file" dialog box
-	savefile_wid="$(xdotool search --name "$savefileDialogTitle" | head -n 1)"
-	if [[ ! "$savefile_wid" =~ $windowIdValidationRegex ]]; then
-		printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
-		exit 1
-	fi
-
-	# Fix for Issue #1: Explicitly focus on the "name" field (works on both: gnome, and kde)
-	xdotool windowactivate "$savefile_wid" key --delay 20 --clearmodifier 'Alt+n'
 
 	# Check if we are using kde
 	isKde=0
@@ -234,9 +236,9 @@ main() {
 		if [[ "$isKde" -eq 1 ]]; then
 			printf "INFO: Desktop session is found to be '$DESKTOP_SESSION', hence the full file name will be highlighted. " >&2
 			printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
-			xdotool windowactivate "$savefile_wid" key --delay 40 --clearmodifier End Left Left Left Left Left
+			xdotool windowactivate "$savefileWindowId" key --delay 40 --clearmodifier End Left Left Left Left Left
 		else
-			xdotool windowactivate "$savefile_wid" key --delay 20 --clearmodifiers Right
+			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Right
 		fi
 		set -u
 		###########################
@@ -252,15 +254,15 @@ main() {
 	if [[ ! -z "$destination" ]]; then
 		if [[ -d "$destination" ]]; then
 			# Case 1: --destination was a directory.
-			xdotool windowactivate "$savefile_wid" key --delay 20 --clearmodifiers Home
+			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Home
 			xdotool type --delay 10 --clearmodifiers "$destination/"
 		else
 			# Case 2: --destination was full path.
-			xdotool windowactivate "$savefile_wid" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
+			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
 			xdotool type --delay 10 --clearmodifiers "$destination"
 		fi
 	fi
-	xdotool windowactivate "$savefile_wid" key --delay 20 --clearmodifiers Return
+	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
 
 	printf "INFO: Saving web page ...\n" >&2
 
