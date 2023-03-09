@@ -79,11 +79,10 @@ validate_input() {
 		info "The specified destination ('$destination') is a directory path, will save file inside it with the default name."
 	else
 		local destinationDir="$(dirname "$destination")"
-		if [[ ! -d "$destinationDir" ]]; then
-			error "Directory '$destinationDir' does not exist - Will NOT continue."
-			# TODO: create it ?
-			exit 1
-		fi
+		[ ! -d "$destinationDir" ] || {
+			mkdir -p "$destinationDir"
+			info "Directory '$destinationDir' created for you."
+			}
 	fi
 	destination="$(readlink -f "$destination")"	# Ensure absolute path
 
