@@ -116,16 +116,22 @@ loadPageInBrowser() {
 	}
 
 
-sendCtrlSToBrowser() {
-	xdotool search --desktop 0 --class --classname --name "$browserMainWindowTitle" windowactivate key --clearmodifiers 'ctrl+s'
-	# adding '--class --classname --name' avoids the message :
-	#	Defaulting to search window name, class, and classname
-	# source : https://github.com/jordansissel/xdotool/issues/250
-
+sendKeysToWindow() {
+	local keys=$1
+	local window=$2
+	xdotool search --desktop 0 --name "$window" windowactivate key --clearmodifiers "$keys"
 	# source :
 	#	https://askubuntu.com/questions/21262/shell-command-to-bring-a-program-window-in-front-of-another/21276#21276
 	#	https://code.google.com/archive/p/semicomplete/issues/66
 
+	# adding '--class', '--classname' or '--name' (i.e. being explicit) avoids the message :
+	#	Defaulting to search window name, class, and classname
+	# source : https://github.com/jordansissel/xdotool/issues/250
+	}
+
+
+sendCtrlSToBrowser() {
+	sendKeysToWindow 'ctrl+s' "$browserMainWindowTitle"
 	sleep 1	# Give 'Save as' dialog box time to show up
 	}
 
@@ -267,7 +273,7 @@ saveFileAs() {
 
 
 closeBrowserTab() {
-	xdotool search --desktop 0 --class --classname --name "$browserMainWindowTitle" windowactivate key --clearmodifiers 'ctrl+w'
+	sendKeysToWindow 'ctrl+w' "$browserMainWindowTitle"
 	info 'Done!'
 	}
 
