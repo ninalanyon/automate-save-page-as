@@ -12,7 +12,7 @@ destination='.'
 browser='google-chrome'
 suffix=''
 url=''
-webBrowserWindowId=''
+
 savefileDialogTitle=''	# will be populated later
 usingKde=0
 
