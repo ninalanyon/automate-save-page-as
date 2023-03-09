@@ -13,6 +13,7 @@ browser='google-chrome'
 suffix=''
 url=''
 webBrowserWindowId=''
+savefileDialogTitle=''	# will be populated later
 
 checkXdotoolIsInstalled() {
 	if ! xdotool --help &>/dev/null; then
@@ -177,25 +178,32 @@ getCliParameters() {
 	}
 
 
+loadBrowserVariables() {
+	case "$browser" in
+		firefox)
+			savefileDialogTitle='Save as'
+			;;
+		*)	# 'google-chrome, ... ?'
+			savefileDialogTitle='Save file'
+			;;
+	esac
+	}
+
+
 main() {
 	checkXdotoolIsInstalled
 	getCliParameters "$@"
 
 	validate_input
+	loadBrowserVariables
 	loadPageInBrowser
 	sendCtrlSToBrowser
 
 
 
 
-	# Resolve the expected title name for save file dialog box (chrome & firefox differ in this regard)
-	if [[ "$browser" == 'firefox' ]]; then
-		savefile_dialog_title='Save as'
-	else
-		savefile_dialog_title='Save file'
-	fi
 	# Find window id for the "Save file" dialog box
-	savefile_wid="$(xdotool search --name "$savefile_dialog_title" | head -n 1)"
+	savefile_wid="$(xdotool search --name "$savefileDialogTitle" | head -n 1)"
 	if [[ ! "$savefile_wid" =~ $windowIdValidationRegex ]]; then
 		printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
 		exit 1
