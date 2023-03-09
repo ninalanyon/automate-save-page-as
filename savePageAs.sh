@@ -19,7 +19,7 @@ usingKde=0
 
 checkXdotoolIsInstalled() {
 	if ! xdotool --help &>/dev/null; then
-		printf "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform.\n" >&2
+		echo "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform." >&2
 		exit 1
 	fi
 	}
@@ -93,7 +93,7 @@ validate_input() {
 	fi
 
 	if [[ $(has_non_printable_or_non_ascii "$destination") -eq 1 || $(has_non_printable_or_non_ascii "$suffix") -eq 1 ]]; then
-		printf "ERROR: Either --destination ('%s') or --suffix ('%s') contains a non ascii or non-printable ascii character(s). " "$destination" "$suffix" >&2
+		printf "ERROR: Either --destination ('%s') or --suffix ('%s') contains a non ascii or non-printable ascii character(s)." "$destination" "$suffix" >&2
 		printf "'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n" >&2
 		printf '!!!! Will NOT proceed !!!!\n' >&2
 		exit 1
