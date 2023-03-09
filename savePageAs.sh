@@ -5,7 +5,7 @@ set -u
 set -o pipefail
 
 browser='firefox'
-destination='.'
+destination='./'
 scriptname="$(basename "$0")"
 usingKde=0
 waitTimeSecondsLoad=4
@@ -63,7 +63,7 @@ usage() {
 # (Inspiration: http://stackoverflow.com/a/13596664/1857518)
 has_non_printable_or_non_ascii() {
 	LANG=C
-	if printf "%s" "$1" | grep '[^ -~]\+' &>/dev/null; then
+	if echo "$1" | grep '[^ -~]\+' &>/dev/null; then
 		echo 1
 	else
 		echo 0
@@ -73,7 +73,7 @@ has_non_printable_or_non_ascii() {
 
 validate_input() {
 	[ -z "$url" ] && {
-		error 'URL must be specified.'
+		error 'No URL specified.'
 		usage
 		exit 1
 		}
