@@ -118,7 +118,11 @@ loadPageInBrowser() {
 
 sendCtrlSToBrowser() {
 	#TODO: the explicit 'Firefox' below breaks the compatibility with other browsers
-	xdotool search --desktop 0 'Firefox' windowactivate key --clearmodifiers 'ctrl+s'
+	xdotool search --desktop 0 --class --classname --name 'Firefox' windowactivate key --clearmodifiers 'ctrl+s'
+	# adding '--class --classname --name' avoids the message :
+	#	Defaulting to search window name, class, and classname
+	# source : https://github.com/jordansissel/xdotool/issues/250
+
 	# source :
 	#	https://askubuntu.com/questions/21262/shell-command-to-bring-a-program-window-in-front-of-another/21276#21276
 	#	https://code.google.com/archive/p/semicomplete/issues/66
@@ -262,7 +266,7 @@ saveFileAs() {
 
 
 closeBrowserTab() {
-	xdotool search --desktop 0 "Firefox" windowactivate key --clearmodifiers 'ctrl+w'
+	xdotool search --desktop 0 --class --classname --name "Firefox" windowactivate key --clearmodifiers 'ctrl+w'
 	info 'Done!'
 	}
 
