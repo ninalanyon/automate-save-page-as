@@ -22,6 +22,11 @@ error() {
 	}
 
 
+info() {
+	echo "INFO: $1"
+	}
+
+
 checkXdotoolIsInstalled() {
 	if ! xdotool --help &>/dev/null; then
 		error "'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform."
@@ -71,7 +76,7 @@ validate_input() {
 	fi
 
 	if [[ -d "$destination" ]]; then
-		echo "INFO: The specified destination ('$destination') is a directory path, will save file inside it with the default name." >&2
+		info "The specified destination ('$destination') is a directory path, will save file inside it with the default name."
 	else
 		local basedir="$(dirname "$destination")"
 		if [[ ! -d "$basedir" ]]; then
@@ -231,8 +236,7 @@ makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix() {
 		# but this is the only fix I can think for this special case right now. Of course it's easy to tweak the number of
 		# Left key moves you need if you know your file types in advance.
 		if [ "$usingKde" -eq 1 ]; then
-			printf "INFO: Desktop session is found to be '$DESKTOP_SESSION', hence the full file name will be highlighted. " >&2
-			printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
+			info "Desktop session is found to be '$DESKTOP_SESSION', hence the full file name will be highlighted.\nAssuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to)."
 			xdotool windowactivate "$savefileWindowId" key --delay 40 --clearmodifier End Left Left Left Left Left
 		else
 			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Right
@@ -263,16 +267,15 @@ saveFileAs() {
 	fi
 	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
 
-	printf "INFO: Saving web page ...\n" >&2
-
 	# Wait for the file to be completely saved
 	sleep "$waitTimeSecondsSave"
+	info 'Saving web page ...'
 	}
 
 
 closeBrowserTab() {
 	xdotool search --desktop 0 "Firefox" windowactivate key --clearmodifiers 'ctrl+w'
-	printf "INFO: Done!\n">&2
+	info 'Done!'
 	}
 
 
