@@ -17,9 +17,14 @@ savefileDialogTitle=''	# will be populated later
 usingKde=0
 
 
+error() {
+	echo "ERROR: $1" >&2
+	}
+
+
 checkXdotoolIsInstalled() {
 	if ! xdotool --help &>/dev/null; then
-		echo "ERROR: 'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform." >&2
+		error "'xdotool' is not present (or not in the PATH). Please visit http://www.semicomplete.com/projects/xdotool/ to download it for your platform."
 		exit 1
 	fi
 	}
@@ -51,51 +56,50 @@ print_usage() {
 has_non_printable_or_non_ascii() {
 	LANG=C
 	if printf "%s" "$1" | grep '[^ -~]\+' &>/dev/null; then
-		printf 1
+		echo 1
 	else
-		printf 0
+		echo 0
 	fi
 	}
 
 
 validate_input() {
 	if [[ -z "$url" ]]; then
-		printf "ERROR: URL must be specified." >&2
+		error 'URL must be specified.'
 		print_usage
 		exit 1
 	fi
 
 	if [[ -d "$destination" ]]; then
-		printf "INFO: The specified destination ('%s') is a directory path, will save file inside it with the default name.\n" "$destination">&2
+		echo "INFO: The specified destination ('$destination') is a directory path, will save file inside it with the default name." >&2
 	else
 		local basedir="$(dirname "$destination")"
 		if [[ ! -d "$basedir" ]]; then
-			printf "ERROR: Directory '%s' does not exist - Will NOT continue.\n" "$basedir" >&2
+			error "Directory '$basedir' does not exist - Will NOT continue."
+			# TODO: create it ?
 			exit 1
 		fi
 	fi
 	destination="$(readlink -f "$destination")"	# Ensure absolute path
 
 	if [[ "$browser" != 'google-chrome' && "$browser" != 'chromium-browser' && "$browser" != 'firefox' ]]; then
-		printf "ERROR: Browser (%s) is not supported, must be one of 'google-chrome', 'chromium-browser' or 'firefox'.\n" "$browser" >&2
+		error "Browser '$browser' is not supported, must be one of 'google-chrome', 'chromium-browser' or 'firefox'."
 		exit 1
 	fi
 
 	if ! command -v "$browser" &>/dev/null; then
-		printf "ERROR: Command '$browser' not found. Make sure it is installed, and in path.\n" >&2
+		error "Command '$browser' not found. Make sure it is installed, and in path."
 		exit 1
 	fi
 
 	local num_regexp='^.[0-9]+$|^[0-9]+$|^[0-9]+.[0-9]+$'	# Matches a valid number (in decimal notation)
 	if [[ ! "$waitTimeSecondsLoad" =~ $num_regexp || ! "$waitTimeSecondsSave" =~ $num_regexp ]]; then
-		printf "ERROR: --load-wait-time (='%s'), and --waitTimeSeconds_save(='%s') must be valid numbers.\n" "$waitTimeSecondsLoad" "$waitTimeSecondsLoad" >&2
+		error "--load-wait-time (='$waitTimeSecondsLoad'), and --waitTimeSeconds_save(='$waitTimeSecondsLoad') must be valid numbers."
 		exit 1
 	fi
 
 	if [[ $(has_non_printable_or_non_ascii "$destination") -eq 1 || $(has_non_printable_or_non_ascii "$suffix") -eq 1 ]]; then
-		printf "ERROR: Either --destination ('%s') or --suffix ('%s') contains a non ascii or non-printable ascii character(s)." "$destination" "$suffix" >&2
-		printf "'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n" >&2
-		printf '!!!! Will NOT proceed !!!!\n' >&2
+		error "Either --destination ('$destination') or --suffix ('$suffix') contains non-ascii or non-printable ascii character(s).\n'xdotool' does not mingle well with non-ascii characters (https://code.google.com/p/semicomplete/issues/detail?id=14).\n\n"'!!!! Will NOT proceed !!!!'
 		exit 1
 	fi
 	}
@@ -162,13 +166,13 @@ getCliParameters() {
 				exit 0
 				;;
 			-*)
-				printf "ERROR: Unknown option: %s\n" "$1">&2
+				error "Unknown option: '$1'"
 				print_usage
 				exit 1
 				;;
 			*)
 				if [ ! -z "$url" ]; then
-					printf "ERROR: Expected exactly one positional argument (URL) to be present, but encountered a second one ('%s').\n\n" "$1" >&2
+					error "Expected exactly one positional argument (URL) to be present, but encountered a second one ('$1')."
 					print_usage
 					exit 1
 				fi
@@ -196,7 +200,7 @@ findSaveFileDialogBoxWindowId() {
 	windowIdValidationRegex='^[0-9]+$'	# window-id must be a valid integer
 	savefileWindowId="$(xdotool search --name "$savefileDialogTitle" | head -n 1)"
 	if [[ ! "$savefileWindowId" =~ $windowIdValidationRegex ]]; then
-		printf "ERROR: Unable to find window id for 'Save File' Dialog.\n" >&2
+		error "Unable to find window id for 'Save File' Dialog."
 		exit 1
 	fi
 
