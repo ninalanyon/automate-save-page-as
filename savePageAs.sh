@@ -4,7 +4,7 @@ set -e
 set -u
 set -o pipefail
 
-browser='google-chrome'
+browser='firefox'
 destination='.'
 scriptname="$(basename "$0")"
 usingKde=0
@@ -192,8 +192,8 @@ loadBrowserVariables() {
 			browserMainWindowTitle='Firefox'
 			savefileDialogTitle='Save as'
 			;;
-		*)	# 'google-chrome, ... ?'
-			browserMainWindowTitle='not tested yet ;-)'
+		*)	# 'google-chrome', 'chromium-browser'
+			browserMainWindowTitle='TODO:'
 			savefileDialogTitle='Save file'
 			;;
 	esac
