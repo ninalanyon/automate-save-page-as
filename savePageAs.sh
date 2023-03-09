@@ -117,8 +117,7 @@ loadPageInBrowser() {
 
 
 sendCtrlSToBrowser() {
-	#TODO: the explicit 'Firefox' below breaks the compatibility with other browsers
-	xdotool search --desktop 0 --class --classname --name 'Firefox' windowactivate key --clearmodifiers 'ctrl+s'
+	xdotool search --desktop 0 --class --classname --name "$browserMainWindowTitle" windowactivate key --clearmodifiers 'ctrl+s'
 	# adding '--class --classname --name' avoids the message :
 	#	Defaulting to search window name, class, and classname
 	# source : https://github.com/jordansissel/xdotool/issues/250
@@ -185,9 +184,11 @@ getCliParameters() {
 loadBrowserVariables() {
 	case "$browser" in
 		firefox)
+			browserMainWindowTitle='Firefox'
 			savefileDialogTitle='Save as'
 			;;
 		*)	# 'google-chrome, ... ?'
+			browserMainWindowTitle='not tested yet ;-)'
 			savefileDialogTitle='Save file'
 			;;
 	esac
@@ -266,7 +267,7 @@ saveFileAs() {
 
 
 closeBrowserTab() {
-	xdotool search --desktop 0 --class --classname --name "Firefox" windowactivate key --clearmodifiers 'ctrl+w'
+	xdotool search --desktop 0 --class --classname --name "$browserMainWindowTitle" windowactivate key --clearmodifiers 'ctrl+w'
 	info 'Done!'
 	}
 
