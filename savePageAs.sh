@@ -126,10 +126,7 @@ sendCtrlSToBrowser() {
 	}
 
 
-main() {
-	checkXdotoolIsInstalled
-
-
+getCliParameters() {
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
 			-d | --destination)
@@ -177,6 +174,12 @@ main() {
 				;;
 		esac
 	done
+	}
+
+
+main() {
+	checkXdotoolIsInstalled
+	getCliParameters "$@"
 
 	validate_input
 	loadPageInBrowser
