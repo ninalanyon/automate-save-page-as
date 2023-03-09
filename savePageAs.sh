@@ -229,7 +229,7 @@ main() {
 	checkIfWeAreUsingKde
 
 
-	if [[ ! -z "$suffix" ]]; then
+	if [ -n "$suffix" ]; then
 		###########################
 		# Make sure that we are at correct position before typing the "suffix"
 		#
@@ -239,7 +239,7 @@ main() {
 		# Now this strategy is certainly not full proof and assumes that file extension is always 4 characters long ('html'),
 		# but this is the only fix I can think for this special case right now. Of course it's easy to tweak the number of
 		# Left key moves you need if you know your file types in advance.
-		if [[ "$usingKde" -eq 1 ]]; then
+		if [ "$usingKde" -eq 1 ]; then
 			printf "INFO: Desktop session is found to be '$DESKTOP_SESSION', hence the full file name will be highlighted. " >&2
 			printf "Assuming extension .html to move back 5 character left before adding suffix (change accordingly if you need to).\n" >&2
 			xdotool windowactivate "$savefileWindowId" key --delay 40 --clearmodifier End Left Left Left Left Left
@@ -249,16 +249,14 @@ main() {
 		set -u
 		###########################
 
-		extraarg=''
-		if [[ "${suffix::1}" == '-' ]]; then
-			extraarg='-'
-		fi
+		# check 1st char of "$suffix"
+		[ "${suffix::1}" == '-' ] && extraarg='-' || extraarg=''
 		xdotool type --delay 10 --clearmodifiers "$extraarg" "$suffix"
 	fi
 
 	# Activate the 'Save File' dialog and type in the appropriate filename (depending on $destination value: 1) directory, 2) full path, 3) empty)
-	if [[ ! -z "$destination" ]]; then
-		if [[ -d "$destination" ]]; then
+	if [ -n "$destination" ]; then
+		if [ -d "$destination" ]; then
 			# Case 1: --destination was a directory.
 			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Home
 			xdotool type --delay 10 --clearmodifiers "$destination/"
@@ -276,7 +274,7 @@ main() {
 	sleep "$waitTimeSecondsSave"
 
 	# Close the browser tab/window (Ctrl+w for KDE, Ctrl+F4 otherwise)
-	if [[ "$usingKde" -eq 1 ]]; then
+	if [ "$usingKde" -eq 1 ]; then
 		xdotool windowactivate "$webBrowserWindowId" key --clearmodifiers "ctrl+w"
 	else
 	# TODO:
