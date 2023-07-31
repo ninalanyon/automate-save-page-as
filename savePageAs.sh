@@ -264,14 +264,12 @@ saveFileAs() {
 	# Activate the 'Save File' dialog and type in the specified "$destination" :
 	# - directory
 	# - full path
-	if [ -n "$destination" ]; then
-		if [ -d "$destination" ]; then
-			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Home
-			xdotool type --delay 10 --clearmodifiers "$destination/"
-		else
-			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
-			xdotool type --delay 10 --clearmodifiers "$destination"
-		fi
+	if [ -d "$destination" ]; then
+		xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Home
+		xdotool type --delay 10 --clearmodifiers "$destination/"
+	else
+		xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
+		xdotool type --delay 10 --clearmodifiers "$destination"
 	fi
 	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
 
