@@ -261,14 +261,14 @@ makeSureWeAreAtCorrectPositionBeforeTypingTheSuffix() {
 
 
 saveFileAs() {
-	# Activate the 'Save File' dialog and type in the appropriate filename (depending on $destination value: 1) directory, 2) full path, 3) empty)
+	# Activate the 'Save File' dialog and type in the specified "$destination" :
+	# - directory
+	# - full path
 	if [ -n "$destination" ]; then
 		if [ -d "$destination" ]; then
-			# Case 1: --destination was a directory.
 			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Home
 			xdotool type --delay 10 --clearmodifiers "$destination/"
 		else
-			# Case 2: --destination was full path.
 			xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
 			xdotool type --delay 10 --clearmodifiers "$destination"
 		fi
