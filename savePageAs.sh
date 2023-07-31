@@ -269,6 +269,13 @@ saveFileAs() {
 		xdotool type --delay 10 --clearmodifiers "$destination/"
 	else
 		xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers "ctrl+a" "BackSpace"
+
+		# When the destination file already exists, typing the file name then [ENTER]
+		# displays the "Replace existing file 'xxx' ?" dialog box.
+		# In such case, suffixing the file name with the current date+time serves as a
+		# quick'n'dirty workaround without interrupting the script.
+		[ -e "$destination" ] && destination="$destination"__$(date +%F_%H-%M-%S)
+
 		xdotool type --delay 10 --clearmodifiers "$destination"
 	fi
 	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
