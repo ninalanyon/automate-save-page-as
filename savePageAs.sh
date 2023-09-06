@@ -107,7 +107,7 @@ validate_input() {
 
 	local decimalNumberValidationRegex='^([0-9]+|([0-9]+?\.[0-9]+))$'
 	if [[ ! "$waitTimeSecondsLoad" =~ $decimalNumberValidationRegex || ! "$waitTimeSecondsSave" =~ $decimalNumberValidationRegex ]]; then
-		error "--load-wait-time (='$waitTimeSecondsLoad'), and --waitTimeSeconds_save(='$waitTimeSecondsLoad') must be valid numbers."
+		error "--load-wait-time (='$waitTimeSecondsLoad'), and --save-wait-time(='$waitTimeSecondsSave') must be valid numbers."
 		exit 1
 	fi
 
