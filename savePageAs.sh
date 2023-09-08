@@ -280,14 +280,14 @@ saveFileAs() {
 	fi
 	xdotool windowactivate "$savefileWindowId" key --delay 20 --clearmodifiers Return
 
-	info 'Saving web page ...'
+#	info 'Saving web page ...'
 	sleep "$waitTimeSecondsSave"	# Wait for the file to be completely saved
 	}
 
 
 closeBrowserTab() {
 	sendKeysToWindow 'ctrl+w' "$browserMainWindowTitle"
-	info 'Done!'
+#	info 'Done!'
 	}
 
 
