@@ -1,6 +1,8 @@
 automate-save-page-as
 =====================
 
+Forked from Httqm's fork of abiyani's original in case I want to combine it with some changes from other forks.
+
 *A quick hack for when `wget` doesn't cut it.*
 
 **tl;dr Perform browser's "Save page as" (Ctrl+S) operation from command line without manual intervention**
