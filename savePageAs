@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
+set -x
 set -e
 set -u
 set -o pipefail
 
 browser='firefox'
 destination='./'
-scriptname="$(basename "$0")"
 usingKde=0
 waitTimeSecondsLoad=4
 waitTimeSecondsSave=8
@@ -36,6 +36,7 @@ checkXdotoolIsInstalled() {
 
 
 usage() {
+	local scriptname="$(basename "$0")"
 	cat <<-EOF
 
 	$scriptname: Open the given url in a browser tab/window, perform 'Save As' operation and close the tab/window.
