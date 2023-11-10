@@ -1,0 +1,11 @@
+* Notes on the behaviour of the script, problems, solutions, etc.
+
+Just a place to dump ideas and problems so they don't get forgotten.
+Simpler than creating Github issues and also local.
+
+* xdotool
+
+** 20231110 Friday
+
+Whenever I run the script the keyboard is messed up afterwards and I
+have to log out to make it usable again.  So what is going on?
